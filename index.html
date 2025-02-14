@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorting Algorithm Race – Super Advanced</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      margin: 0;
+      padding: 0;
+    }
+    #controls {
+      padding: 15px;
+      text-align: center;
+      background: #333;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    #controls button, #controls input {
+      font-size: 1rem;
+      margin: 0 10px;
+      padding: 5px 10px;
+    }
+    #raceContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .lane {
+      border: 2px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      width: 400px;
+      padding: 10px;
+    }
+    .lane h2 {
+      text-align: center;
+      margin: 10px 0;
+    }
+    .lane canvas {
+      background: #f9f9f9;
+      display: block;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+    }
+    .lane .status {
+      text-align: center;
+      margin-top: 8px;
+      font-weight: bold;
+      color: #555;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button id="startButton">Start Race</button>
+    <button id="resetButton">Reset Race</button>
+    <label for="speedRange">Speed:</label>
+    <input type="range" id="speedRange" min="1" max="100" value="50">
+    <span id="speedValue">50</span>
+    <label for="arraySize">Array Size:</label>
+    <input type="number" id="arraySize" min="10" max="200" value="50">
+  </div>
+  <div id="raceContainer">
+    <div class="lane" data-algo="Bubble Sort">
+      <h2>Bubble Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Selection Sort">
+      <h2>Selection Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Insertion Sort">
+      <h2>Insertion Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Quick Sort">
+      <h2>Quick Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Merge Sort">
+      <h2>Merge Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Heap Sort">
+      <h2>Heap Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Shell Sort">
+      <h2>Shell Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+    <div class="lane" data-algo="Gnome Sort">
+      <h2>Gnome Sort</h2>
+      <canvas></canvas>
+      <div class="status"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================
+    // Sorting Algorithms as Generators
+    // ==========================
+
+    // Bubble Sort
+    function* bubbleSort(arr) {
+      let n = arr.length;
+      let swapped;
+      do {
+        swapped = false;
+        for (let i = 0; i < n - 1; i++) {
+          yield { type: 'compare', indices: [i, i + 1] };
+          if (arr[i] > arr[i + 1]) {
+            [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+            swapped = true;
+            yield { type: 'swap', indices: [i, i + 1] };
+          }
+        }
+        n--;
+      } while (swapped);
+      return arr;
+    }
+
+    // Selection Sort
+    function* selectionSort(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        let minIndex = i;
+        for (let j = i + 1; j < arr.length; j++) {
+          yield { type: 'compare', indices: [minIndex, j] };
+          if (arr[j] < arr[minIndex]) {
+            minIndex = j;
+          }
+        }
+        if (minIndex !== i) {
+          [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+          yield { type: 'swap', indices: [i, minIndex] };
+        }
+      }
+      return arr;
+    }
+
+    // Insertion Sort
+    function* insertionSort(arr) {
+      for (let i = 1; i < arr.length; i++) {
+        let key = arr[i];
+        let j = i - 1;
+        yield { type: 'compare', indices: [j, i] };
+        while (j >= 0 && arr[j] > key) {
+          arr[j + 1] = arr[j];
+          yield { type: 'swap', indices: [j, j + 1] };
+          j--;
+          if (j >= 0) yield { type: 'compare', indices: [j, i] };
+        }
+        arr[j + 1] = key;
+        yield { type: 'swap', indices: [j + 1, i] };
+      }
+      return arr;
+    }
+
+    // Quick Sort (non-recursive using a stack)
+    function* quickSort(arr) {
+      let stack = [];
+      stack.push(0);
+      stack.push(arr.length - 1);
+      while (stack.length > 0) {
+        let end = stack.pop();
+        let start = stack.pop();
+        if (start >= end) continue;
+        let pivot = arr[end];
+        let pivotIndex = start;
+        yield { type: 'compare', indices: [pivotIndex, end] };
+        for (let i = start; i < end; i++) {
+          yield { type: 'compare', indices: [i, end] };
+          if (arr[i] < pivot) {
+            [arr[i], arr[pivotIndex]] = [arr[pivotIndex], arr[i]];
+            yield { type: 'swap', indices: [i, pivotIndex] };
+            pivotIndex++;
+          }
+        }
+        [arr[pivotIndex], arr[end]] = [arr[end], arr[pivotIndex]];
+        yield { type: 'swap', indices: [pivotIndex, end] };
+        if (pivotIndex - 1 > start) {
+          stack.push(start);
+          stack.push(pivotIndex - 1);
+        }
+        if (pivotIndex + 1 < end) {
+          stack.push(pivotIndex + 1);
+          stack.push(end);
+        }
+      }
+      return arr;
+    }
+
+    // Merge Sort (iterative bottom-up)
+    function* mergeSort(arr) {
+      const n = arr.length;
+      let width = 1;
+      while (width < n) {
+        for (let i = 0; i < n; i += 2 * width) {
+          let left = i;
+          let mid = Math.min(i + width, n);
+          let right = Math.min(i + 2 * width, n);
+          let temp = [];
+          let l = left, r = mid;
+          while (l < mid && r < right) {
+            yield { type: 'compare', indices: [l, r] };
+            if (arr[l] <= arr[r]) {
+              temp.push(arr[l]);
+              l++;
+            } else {
+              temp.push(arr[r]);
+              r++;
+            }
+          }
+          while (l < mid) {
+            temp.push(arr[l]);
+            l++;
+          }
+          while (r < right) {
+            temp.push(arr[r]);
+            r++;
+          }
+          // Copy merged array back to arr
+          for (let j = 0; j < temp.length; j++) {
+            arr[left + j] = temp[j];
+            yield { type: 'overwrite', indices: [left + j] };
+          }
+        }
+        width *= 2;
+      }
+      return arr;
+    }
+
+    // Heap Sort
+    function* heapSort(arr) {
+      let n = arr.length;
+      // Build max heap
+      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+        yield* heapify(arr, n, i);
+      }
+      for (let i = n - 1; i > 0; i--) {
+        [arr[0], arr[i]] = [arr[i], arr[0]];
+        yield { type: 'swap', indices: [0, i] };
+        yield* heapify(arr, i, 0);
+      }
+      return arr;
+    }
+    function* heapify(arr, n, i) {
+      let largest = i;
+      let left = 2 * i + 1;
+      let right = 2 * i + 2;
+      if (left < n) {
+        yield { type: 'compare', indices: [left, largest] };
+        if (arr[left] > arr[largest]) largest = left;
+      }
+      if (right < n) {
+        yield { type: 'compare', indices: [right, largest] };
+        if (arr[right] > arr[largest]) largest = right;
+      }
+      if (largest !== i) {
+        [arr[i], arr[largest]] = [arr[largest], arr[i]];
+        yield { type: 'swap', indices: [i, largest] };
+        yield* heapify(arr, n, largest);
+      }
+    }
+
+    // Shell Sort
+    function* shellSort(arr) {
+      let n = arr.length;
+      let gap = Math.floor(n / 2);
+      while (gap > 0) {
+        for (let i = gap; i < n; i++) {
+          let temp = arr[i];
+          let j = i;
+          yield { type: 'compare', indices: [j - gap, i] };
+          while (j >= gap && arr[j - gap] > temp) {
+            arr[j] = arr[j - gap];
+            yield { type: 'swap', indices: [j, j - gap] };
+            j -= gap;
+            if (j >= gap) yield { type: 'compare', indices: [j - gap, i] };
+          }
+          arr[j] = temp;
+          yield { type: 'swap', indices: [j, i] };
+        }
+        gap = Math.floor(gap / 2);
+      }
+      return arr;
+    }
+
+    // Gnome Sort
+    function* gnomeSort(arr) {
+      let index = 0;
+      while (index < arr.length) {
+        if (index === 0) {
+          index++;
+          continue;
+        }
+        yield { type: 'compare', indices: [index, index - 1] };
+        if (arr[index] >= arr[index - 1]) {
+          index++;
+        } else {
+          [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
+          yield { type: 'swap', indices: [index, index - 1] };
+          index--;
+        }
+      }
+      return arr;
+    }
+
+    // ==========================
+    // Main Code
+    // ==========================
+    document.addEventListener("DOMContentLoaded", function() {
+      const lanes = [];
+      const laneElements = document.querySelectorAll('.lane');
+      laneElements.forEach(laneEl => {
+        const canvas = laneEl.querySelector('canvas');
+        // Set canvas dimensions (width taken from lane, fixed height)
+        canvas.width = 380;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        const status = laneEl.querySelector('.status');
+        const algoName = laneEl.dataset.algo;
+        lanes.push({
+          element: laneEl,
+          canvas: canvas,
+          ctx: ctx,
+          status: status,
+          algoName: algoName,
+          algorithm: null,
+          array: [],
+          generator: null,
+          highlightIndices: [],
+          finished: false,
+          timer: null,
+          startTime: null,
+          finishTime: null,
+          comparisons: 0,
+          swaps: 0,
+          overwrites: 0
+        });
+      });
+
+      // Map algorithm names to generator functions
+      const algorithms = {
+        "Bubble Sort": bubbleSort,
+        "Selection Sort": selectionSort,
+        "Insertion Sort": insertionSort,
+        "Quick Sort": quickSort,
+        "Merge Sort": mergeSort,
+        "Heap Sort": heapSort,
+        "Shell Sort": shellSort,
+        "Gnome Sort": gnomeSort
+      };
+
+      // Control Elements
+      const startButton = document.getElementById('startButton');
+      const resetButton = document.getElementById('resetButton');
+      const speedRange = document.getElementById('speedRange');
+      const speedValue = document.getElementById('speedValue');
+      const arraySizeInput = document.getElementById('arraySize');
+
+      speedRange.addEventListener('input', function() {
+        speedValue.textContent = speedRange.value;
+      });
+
+      startButton.addEventListener('click', function() {
+        startRace();
+      });
+
+      resetButton.addEventListener('click', function() {
+        resetRace();
+      });
+
+      function generateRandomArray(size, maxVal) {
+        const arr = [];
+        for (let i = 0; i < size; i++) {
+          // Generate a value between 5 and maxVal
+          arr.push(Math.floor(Math.random() * (maxVal - 5)) + 5);
+        }
+        return arr;
+      }
+
+      function startRace() {
+        startButton.disabled = true;
+        resetButton.disabled = false;
+        const size = parseInt(arraySizeInput.value);
+        const maxVal = 200; // Maximum bar height
+        const baseArray = generateRandomArray(size, maxVal);
+
+        lanes.forEach(lane => {
+          lane.array = baseArray.slice(); // Clone the base array
+          lane.finished = false;
+          lane.highlightIndices = [];
+          lane.comparisons = 0;
+          lane.swaps = 0;
+          lane.overwrites = 0;
+          lane.ctx.clearRect(0, 0, lane.canvas.width, lane.canvas.height);
+          lane.status.textContent = "Starting...";
+          lane.algorithm = algorithms[lane.algoName];
+          lane.generator = lane.algorithm(lane.array);
+          lane.startTime = performance.now();
+          drawLane(lane);
+          processLaneStep(lane);
+        });
+      }
+
+      function resetRace() {
+        lanes.forEach(lane => {
+          if (lane.timer) {
+            clearTimeout(lane.timer);
+            lane.timer = null;
+          }
+          lane.finished = true; // Stop further processing
+          lane.status.textContent = "";
+          lane.highlightIndices = [];
+          lane.ctx.clearRect(0, 0, lane.canvas.width, lane.canvas.height);
+        });
+        startButton.disabled = false;
+      }
+
+      function processLaneStep(lane) {
+        if (lane.finished) return;
+        const result = lane.generator.next();
+        if (result.done) {
+          lane.finished = true;
+          lane.finishTime = performance.now();
+          lane.highlightIndices = [];
+          drawLane(lane);
+          lane.status.textContent = `Finished in ${((lane.finishTime - lane.startTime) / 1000).toFixed(2)} s (Comp: ${lane.comparisons}, Swap: ${lane.swaps}${lane.overwrites ? ', Write: ' + lane.overwrites : ''})`;
+          // Re-enable start if all lanes are done
+          if (lanes.every(l => l.finished)) {
+            startButton.disabled = false;
+          }
+          return;
+        }
+        const step = result.value;
+        // Update counters based on step type
+        if (step.type === 'compare') lane.comparisons++;
+        if (step.type === 'swap') lane.swaps++;
+        if (step.type === 'overwrite') lane.overwrites++;
+        lane.highlightIndices = step.indices || [];
+        let stats = ` (Comp: ${lane.comparisons}, Swap: ${lane.swaps}`;
+        if (lane.overwrites) stats += `, Write: ${lane.overwrites}`;
+        stats += ')';
+        lane.status.textContent = step.type + stats;
+        drawLane(lane);
+        // Map slider value (1–100) to delay (101ms to 1ms)
+        const delay = 101 - parseInt(speedRange.value);
+        lane.timer = setTimeout(() => processLaneStep(lane), delay);
+      }
+
+      function drawLane(lane) {
+        const ctx = lane.ctx;
+        const canvas = lane.canvas;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const barWidth = canvas.width / lane.array.length;
+        for (let i = 0; i < lane.array.length; i++) {
+          const barHeight = lane.array[i];
+          const x = i * barWidth;
+          const y = canvas.height - barHeight;
+          ctx.fillStyle = lane.highlightIndices.includes(i) ? 'red' : 'blue';
+          ctx.fillRect(x, y, barWidth, barHeight);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
