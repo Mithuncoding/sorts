@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Arena | Sorting Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-chart-bar"></i>
+      <h1>Algorithm Arena</h1>
+    </div>
+    <div class="theme-toggle">
+      <i class="fas fa-moon"></i>
+    </div>
+  </header>
+  
+  <div class="dashboard">
+    <div class="control-panel">
+      <div class="panel-section">
+        <h3>Visualization Controls</h3>
+        <div class="control-group">
+          <button id="startButton" class="btn primary"><i class="fas fa-play"></i> Start Race</button>
+          <button id="pauseButton" class="btn secondary" disabled><i class="fas fa-pause"></i> Pause</button>
+          <button id="resetButton" class="btn secondary"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Array Settings</h3>
+        <div class="control-group">
+          <label for="arraySize">Array Size:</label>
+          <div class="slider-container">
+            <input type="range" id="arraySize" min="10" max="200" value="50">
+            <span id="arraySizeValue">50</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="distributionType">Distribution:</label>
+          <select id="distributionType">
+            <option value="random">Random</option>
+            <option value="nearlySorted">Nearly Sorted</option>
+            <option value="reversed">Reversed</option>
+            <option value="fewUnique">Few Unique Values</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Visualization Speed</h3>
+        <div class="control-group">
+          <div class="slider-container">
+            <input type="range" id="speedRange" min="1" max="100" value="50">
+            <span id="speedValue">50</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <h3>Audio Feedback</h3>
+        <div class="control-group">
+          <label class="toggle">
+            <input type="checkbox" id="audioToggle">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Enable Sounds</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="stats-dashboard" class="stats-dashboard">
+      <h2>Performance Stats</h2>
+      <div id="stats-container" class="stats-container">
+        <div class="stats-card waiting">
+          <span>Run the visualization to see statistics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="race-view">
+    <div id="raceContainer" class="race-container">
+      <div class="lane" data-algo="Bubble Sort" data-complexity="O(n²)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Bubble Sort</h2>
+          <div class="complexity-badge">Time: O(n²)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Selection Sort" data-complexity="O(n²)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Selection Sort</h2>
+          <div class="complexity-badge">Time: O(n²)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Insertion Sort" data-complexity="O(n²)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Insertion Sort</h2>
+          <div class="complexity-badge">Time: O(n²)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Quick Sort" data-complexity="O(n log n)" data-space="O(log n)">
+        <div class="lane-header">
+          <h2>Quick Sort</h2>
+          <div class="complexity-badge">Time: O(n log n)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Merge Sort" data-complexity="O(n log n)" data-space="O(n)">
+        <div class="lane-header">
+          <h2>Merge Sort</h2>
+          <div class="complexity-badge">Time: O(n log n)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Heap Sort" data-complexity="O(n log n)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Heap Sort</h2>
+          <div class="complexity-badge">Time: O(n log n)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Shell Sort" data-complexity="O(n log² n)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Shell Sort</h2>
+          <div class="complexity-badge">Time: O(n log² n)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Radix Sort" data-complexity="O(nk)" data-space="O(n+k)">
+        <div class="lane-header">
+          <h2>Radix Sort</h2>
+          <div class="complexity-badge">Time: O(nk)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Cocktail Sort" data-complexity="O(n²)" data-space="O(1)">
+        <div class="lane-header">
+          <h2>Cocktail Sort</h2>
+          <div class="complexity-badge">Time: O(n²)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+      
+      <div class="lane" data-algo="Tim Sort" data-complexity="O(n log n)" data-space="O(n)">
+        <div class="lane-header">
+          <h2>Tim Sort</h2>
+          <div class="complexity-badge">Time: O(n log n)</div>
+        </div>
+        <canvas></canvas>
+        <div class="status"></div>
+        <div class="metrics">
+          <div class="metric"><i class="fas fa-exchange-alt"></i> <span class="swaps">0</span></div>
+          <div class="metric"><i class="fas fa-not-equal"></i> <span class="comparisons">0</span></div>
+          <div class="metric"><i class="fas fa-stopwatch"></i> <span class="time">0.00s</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="results-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Race Results</h2>
+      <div id="results-chart-container">
+        <canvas id="results-chart"></canvas>
+      </div>
+      <div id="detailed-results"></div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <h3>About Sorting Algorithms</h3>
+    <p>This visualization demonstrates the performance of various sorting algorithms as they organize random data in ascending order. Watch in real-time how each algorithm approaches the sorting problem with different strategies and efficiencies.</p>
+    <p>The colored bars represent array elements, with the height indicating the value. Red highlights show elements being compared or swapped at each step.</p>
+  </div>
+
+  <footer>
+    <p>Mithun R © 2025 | Advanced Sorting Visualizer</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
